@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="templates/static/favicon.png" width="100px" alt="logo" />
   <h1><code>mrinjamul auth</code></h1>
   <p>
     <strong>Authentication service for mrinjamul</strong>
