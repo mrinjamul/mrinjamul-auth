@@ -1,10 +1,7 @@
 package repository
 
 import (
-	"database/sql"
 	"errors"
-	"strconv"
-	"time"
 
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"gorm.io/gorm"
@@ -120,18 +117,18 @@ func (u *userRepo) UpdateUser(user *models.User) error {
 // DeleteUser deletes an existing user
 func (u *userRepo) DeleteUser(id uint) error {
 	// int to string conversion
-	idStr := strconv.Itoa(int(id))
-	emStr := idStr + "@localhost"
-	user := models.User{
-		ID:       id,
-		Username: &idStr,
-		Email:    &emStr,
-		DeletedAt: sql.NullTime{
-			Time:  time.Now(),
-			Valid: true,
-		},
-	}
-	err := u.db.Save(&user).Error
+	// idStr := strconv.Itoa(int(id))
+	// emStr := idStr + "@localhost"
+	// user := models.User{
+	// 	ID:       id,
+	// 	Username: &idStr,
+	// 	Email:    &emStr,
+	// 	DeletedAt: sql.NullTime{
+	// 		Time:  time.Now(),
+	// 		Valid: true,
+	// 	},
+	// }
+	err := u.db.Delete(&models.User{ID: id}).Error
 	if err != nil {
 		return err
 	}

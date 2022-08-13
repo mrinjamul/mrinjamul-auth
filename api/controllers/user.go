@@ -468,23 +468,41 @@ func (u *user) Update(ctx *gin.Context) {
 	}
 
 	// set non empty fields to user struct
-	if *userUpdate.FirstName != "" {
+	if userUpdate.FirstName != nil {
 		user.FirstName = userUpdate.FirstName
 	}
-	if *userUpdate.MiddleName != "" {
+	if userUpdate.MiddleName != nil {
 		user.MiddleName = userUpdate.MiddleName
 	}
-	if *userUpdate.LastName != "" {
+	if userUpdate.LastName != nil {
 		user.LastName = userUpdate.LastName
 	}
-	if *userUpdate.DOB != "" {
+	if userUpdate.DOB != nil {
 		user.DOB = userUpdate.DOB
 	}
-	if *userUpdate.Email != "" {
+	if userUpdate.Email != nil {
 		user.Email = userUpdate.Email
 	}
-	if *userUpdate.Password != "" {
-		user.Password = userUpdate.Password
+	if userUpdate.Password != nil {
+		// Validate Password
+		ok := utils.IsValidPassword(*user.Password)
+		if !ok {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   "bad request",
+				"message": "bad password",
+			})
+			ctx.Abort()
+			return
+		}
+		// Hash the password before storing
+		*user.Password, err = utils.HashAndSalt(*userUpdate.Password)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			ctx.Abort()
+			return
+		}
 	}
 	// if *userUpdate.Username != "" {
 	// 	user.Username = userUpdate.Username
@@ -498,14 +516,14 @@ func (u *user) Update(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-
+	user.Password = nil
+	user.Level = nil
 	ctx.JSON(http.StatusOK, gin.H{
 		"status":  "success",
 		"message": "User updated successfully",
 		// "token":   tokenString,
 		"user": user,
 	})
-
 }
 
 // Delete deletes a user

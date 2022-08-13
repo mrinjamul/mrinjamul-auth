@@ -63,7 +63,7 @@ func GetDB() *gorm.DB {
 	// if unable to connect to database, create sqlite database
 	if !IsConnected {
 		// Create sqlite connection
-		DB, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+		DB, err = gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{})
 		if err == nil {
 			IsConnected = true
 			IsSQLite = true
