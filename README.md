@@ -2,7 +2,7 @@
   <img src="templates/static/favicon.png" width="100px" alt="logo" />
   <h1><code>mrinjamul auth</code></h1>
   <p>
-    <strong>Authentication service for mrinjamul</strong>
+    <strong>A asymmetric JWT based authentication service for user management.</strong>
   </p>
 </div>
 
@@ -41,8 +41,12 @@ go build
 ./mrinjamul-auth
 ```
 
+### Contributing
+
+See the [contributing guide](CONTRIBUTING.md) for more information.
+
 ### License
 
-- No License currently. All rights reserved to the original author.
+- open sourced under the [MIT license](LICENSE)
 
 Copyright (c) 2022 mrinjamul@gmail.com
