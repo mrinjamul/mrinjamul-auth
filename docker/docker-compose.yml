@@ -1,0 +1,38 @@
+version: "3.1"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8080:8080"
+    networks: 
+      - go_net
+
+  db:
+    image: "postgres:12.5"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "postgres"
+    volumes:
+      - ./docker/data/db:/var/lib/postgresql/data
+      - ./docker/sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    ports:
+      - "5432:5432"
+    networks: 
+      - go_net
+
+  adminer:
+    image: "adminer:4.7.8"
+    restart: always
+    ports:
+      - "8000:8080"
+    networks: 
+      - go_net
+
+networks: 
+  go_net:
