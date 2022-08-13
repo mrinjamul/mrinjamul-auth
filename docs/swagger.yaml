@@ -1,0 +1,343 @@
+definitions:
+  controllers.Check:
+    properties:
+      alloc_bytes:
+        description: TotalAllocBytes is the bytes allocated and not yet freed.
+        type: integer
+      failures:
+        additionalProperties:
+          type: string
+        description: Failures holds the failed checks along with their messages.
+        type: object
+      goroutines_count:
+        description: GoroutinesCount is the number of the current goroutines.
+        type: integer
+      heap_objects_count:
+        description: HeapObjectsCount is the number of objects in the go heap.
+        type: integer
+      startup:
+        description: StartUp is the time to boot up the system.
+        type: string
+      status:
+        description: Status is the check status.
+        type: string
+      timestamp:
+        description: Timestamp is the time in which the check occurred.
+        type: string
+      total_alloc_bytes:
+        description: TotalAllocBytes is the total bytes allocated.
+        type: integer
+      uptime:
+        description: Uptime is the time in which the check occurred.
+        type: string
+      version:
+        description: Version is the go version.
+        type: string
+    type: object
+  models.Credentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.ErrResponse:
+    properties:
+      error:
+        $ref: '#/definitions/models.ServiceError'
+    type: object
+  models.Message:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  models.ServiceError:
+    properties:
+      code:
+        type: string
+      kind:
+        type: string
+      message:
+        type: string
+      param:
+        type: string
+    type: object
+  models.Token:
+    properties:
+      token:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/sql.NullTime'
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      level:
+        type: integer
+      middle_name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  sql.NullTime:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /api/health:
+    get:
+      description: checks the health of the system.
+      operationId: healthcheck
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Check'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.Check'
+      summary: Show the status of the system.
+      tags:
+      - healthcheck
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user
+      operationId: login
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+      summary: Login a user
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh a token
+      operationId: refresh-token
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+      summary: Refresh a token
+      tags:
+      - auth
+  /api/v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      operationId: register
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /api/v1/user/{username}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user
+      operationId: delete-user
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+      summary: Delete user
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: Get user details
+      operationId: get-user
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+      summary: Get user details
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Update user details
+      operationId: update-user
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrResponse'
+      summary: Update user details
+      tags:
+      - user
+swagger: "2.0"

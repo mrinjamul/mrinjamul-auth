@@ -33,6 +33,12 @@ Copy environment variables file and replace the values with your own.
 cp .env.example .env
 ```
 
+Generate OpenAPI spec:
+
+```bash
+swag init --parseDependency --parseInternal
+```
+
 To run the application, run the following commands:
 
 ```bash

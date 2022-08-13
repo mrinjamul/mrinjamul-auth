@@ -18,3 +18,8 @@ type Claims struct {
 	Level    int    `json:"level"`
 	jwt.RegisteredClaims
 }
+
+// Token is a struct that will be encoded to a JWT
+type Token struct {
+	Token string `json:"token"`
+}

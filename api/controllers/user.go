@@ -71,7 +71,19 @@ type user struct {
 	userRepo repository.UserRepo
 }
 
-// Register creates a new user
+// Register godoc
+// @Summary Register a new user
+// @Description Register a new user
+// @ID register
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.ErrResponse
+// @Failure 409 {object} models.ErrResponse
+// @Failure 500 {object} models.ErrResponse
+// @Router /api/v1/auth/signup [post]
 func (u *user) Register(ctx *gin.Context) {
 	var user models.User
 	// Get the JSON body and decode into user struct
@@ -86,8 +98,13 @@ func (u *user) Register(ctx *gin.Context) {
 
 	// check if valid username
 	if !utils.IsValidUserName(*user.Username) {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid username",
+		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Invalid",
+				Code:    "InvalidRequestData",
+				Param:   "username",
+				Message: "Username is invalid",
+			},
 		})
 		ctx.Abort()
 		return
@@ -102,9 +119,13 @@ func (u *user) Register(ctx *gin.Context) {
 	// Validate Password
 	ok := utils.IsValidPassword(*user.Password)
 	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "bad request",
-			"message": "bad password",
+		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Invalid",
+				Code:    "InvalidRequestData",
+				Param:   "password",
+				Message: "Password is invalid",
+			},
 		})
 		ctx.Abort()
 		return
@@ -117,8 +138,12 @@ func (u *user) Register(ctx *gin.Context) {
 	// Hash the password before storing
 	*user.Password, err = utils.HashAndSalt(*user.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: "Internal Server Error",
+			},
 		})
 		ctx.Abort()
 		return
@@ -127,8 +152,12 @@ func (u *user) Register(ctx *gin.Context) {
 	// Create the user
 	err = u.userRepo.CreateUser(&user)
 	if err != nil {
-		ctx.JSON(http.StatusConflict, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusConflict, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Conflict",
+				Code:    "Conflict",
+				Message: "User already exists",
+			},
 		})
 		return
 	}
@@ -141,8 +170,12 @@ func (u *user) Register(ctx *gin.Context) {
 		user.Level = &accessLevel
 		err = u.userRepo.UpdateUser(&user)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Internal Server Error",
+			ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+				Error: models.ServiceError{
+					Kind:    "Internal",
+					Code:    "InternalServerError",
+					Message: err.Error(),
+				},
 			})
 		}
 	}
@@ -158,28 +191,43 @@ func (u *user) Register(ctx *gin.Context) {
 		CreatedAt:  user.CreatedAt,
 		DeletedAt:  user.DeletedAt,
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
-		"message": "user created successfully",
-		"user":    user,
-	})
+	ctx.JSON(http.StatusOK, user)
 }
 
-// Login logs in a user
+// Login godoc
+// @Summary Login a user
+// @Description Login a user
+// @ID login
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param user body models.Credentials true "User"
+// @Success 200 {object} models.Token
+// @Failure 400 {object} models.ErrResponse
+// @Failure 500 {object} models.ErrResponse
+// @Router /api/v1/auth/login [post]
 func (u *user) Login(ctx *gin.Context) {
 	var creds models.Credentials
 	var user models.User
 	// Get the JSON body and decode into creds struct
 	err := ctx.BindJSON(&creds)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Invalid",
+				Code:    "InvalidRequestData",
+				Message: "invalid body",
+			},
 		})
 		return
 	}
 	if (creds.Email == "" && creds.Username == "") || creds.Password == "" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "email or password cannot be empty",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "BadRequest",
+				Code:    "BadRequest",
+				Message: "username and password are required",
+			},
 		})
 		return
 	}
@@ -193,8 +241,12 @@ func (u *user) Login(ctx *gin.Context) {
 	if err != nil || user.ID == 0 {
 		user, err = u.userRepo.GetUserByEmail(creds.Email) // error
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid credentials",
+			ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+				Error: models.ServiceError{
+					Kind:    "Unauthorized",
+					Code:    "Unauthorized",
+					Message: "Invalid username or password",
+				},
 			})
 			ctx.Abort()
 			return
@@ -203,8 +255,12 @@ func (u *user) Login(ctx *gin.Context) {
 
 	// if user is deleted then return unauthorized
 	if user.DeletedAt.Valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "user is deleted",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Unauthorized",
+				Code:    "Unauthorized",
+				Message: "User is deleted",
+			},
 		})
 		ctx.Abort()
 		return
@@ -213,8 +269,13 @@ func (u *user) Login(ctx *gin.Context) {
 	// Validate the password
 	valid := utils.VerifyHash(creds.Password, *user.Password)
 	if !valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid Password",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Unauthorized",
+				Code:    "Unauthorized",
+				Param:   "password",
+				Message: "Invalid password",
+			},
 		})
 		ctx.Abort()
 		return
@@ -240,28 +301,46 @@ func (u *user) Login(ctx *gin.Context) {
 	// Create the JWT string
 	tokenString, err := token.SignedString(signingKey)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"token":  tokenString,
+	ctx.JSON(http.StatusOK, models.Token{
+		Token: tokenString,
 	})
 
 }
 
-// RefreshToken refreshes the token
+// RefreshToken godoc
+// @Summary Refresh a token
+// @Description Refresh a token
+// @ID refresh-token
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param token header string true "Token"
+// @Success 200 {object} models.Token
+// @Failure 400 {object} models.ErrResponse
+// @Failure 500 {object} models.ErrResponse
+// @Router /api/v1/auth/refresh [post]
 func (u *user) RefreshToken(ctx *gin.Context) {
 	// Get JWT token
 	tokenString, err := ctx.Cookie("token")
 	if err != nil {
 		tkn, err := utils.ParseToken(ctx.Request.Header.Get("Authorization"))
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid token",
+			ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+				Error: models.ServiceError{
+					Kind:    "Unauthorized",
+					Code:    "Unauthorized",
+					Message: "Invalid token",
+				},
 			})
 			ctx.Abort()
 			return
@@ -273,31 +352,47 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 		return verifyKey, nil
 	})
 	if !token.Valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid token",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Unauthorized",
+				Code:    "Unauthorized",
+				Message: "Invalid token",
+			},
 		})
 		ctx.Abort()
 		return
 	}
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid token",
+			ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+				Error: models.ServiceError{
+					Kind:    "Unauthorized",
+					Code:    "Unauthorized",
+					Message: "Invalid token",
+				},
 			})
 			ctx.Abort()
 
 			return
 		}
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "bad token",
+		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "BadRequest",
+				Code:    "BadToken",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
 	}
 	// check if token is expired
 	if time.Now().Unix() > claims.ExpiresAt.Unix() {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "token expired",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Unauthorized",
+				Code:    "Unauthorized",
+				Message: "Token is expired",
+			},
 		})
 		ctx.Abort()
 		return
@@ -305,9 +400,8 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 
 	// Dont refresh if token is not expired
 	if time.Until(claims.ExpiresAt.Time) > 2*time.Hour {
-		ctx.JSON(http.StatusOK, gin.H{
-			"status": "success",
-			"token":  tokenString,
+		ctx.JSON(http.StatusOK, models.Token{
+			Token: tokenString,
 		})
 		return
 	}
@@ -323,27 +417,46 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 	// Create the JWT string
 	tokenString, err = token.SignedString(signingKey)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"token":  tokenString,
+	ctx.JSON(http.StatusOK, models.Token{
+		Token: tokenString,
 	})
 }
 
-// View returns the public user details
+// View godoc
+// @Summary Get user details
+// @Description Get user details
+// @ID get-user
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param token header string true "Token"
+// @Param username path string true "Username"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.ErrResponse
+// @Failure 500 {object} models.ErrResponse
+// @Router /api/v1/user/{username} [get]
 func (u *user) View(ctx *gin.Context) {
 	// get the username param from context
 	username := ctx.Param("username")
 	// get the user from the database
 	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
@@ -363,16 +476,24 @@ func (u *user) View(ctx *gin.Context) {
 				return verifyKey, nil
 			})
 			if !token.Valid {
-				ctx.JSON(http.StatusUnauthorized, gin.H{
-					"error": "invalid token",
+				ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+					Error: models.ServiceError{
+						Kind:    "Unauthorized",
+						Code:    "Unauthorized",
+						Message: "Invalid token",
+					},
 				})
 				ctx.Abort()
 				return
 			}
 			user, err := u.userRepo.GetUserByUsername(claims.Username)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{
-					"error": "Internal Server Error",
+				ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+					Error: models.ServiceError{
+						Kind:    "Internal",
+						Code:    "InternalServerError",
+						Message: err.Error(),
+					},
 				})
 				ctx.Abort()
 				return
@@ -390,10 +511,7 @@ func (u *user) View(ctx *gin.Context) {
 				CreatedAt:  user.CreatedAt,
 				DeletedAt:  user.DeletedAt,
 			}
-			ctx.JSON(http.StatusOK, gin.H{
-				"status": "success",
-				"user":   user,
-			})
+			ctx.JSON(http.StatusOK, user)
 			return
 		}
 		// if user is found, return the user info
@@ -402,20 +520,33 @@ func (u *user) View(ctx *gin.Context) {
 			FirstName: user.FirstName,
 			CreatedAt: user.CreatedAt,
 		}
-		ctx.JSON(http.StatusOK, gin.H{
-			"status": "success",
-			"user":   user,
-		})
+		ctx.JSON(http.StatusOK, user)
 	} else {
 		// if user is not found, return error
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"status": "user not found",
-			"user":   "",
+		ctx.JSON(http.StatusNotFound, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "NotFound",
+				Code:    "NotFound",
+				Message: "User not found",
+			},
 		})
 	}
 }
 
-// Update updates the user details
+// Update godoc
+// @Summary Update user details
+// @Description Update user details
+// @ID update-user
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param token header string true "Token"
+// @Param username path string true "Username"
+// @Param user body models.User true "User"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.ErrResponse
+// @Failure 500 {object} models.ErrResponse
+// @Router /api/v1/user/{username} [put]
 func (u *user) Update(ctx *gin.Context) {
 	// get the username param from context
 	username := ctx.Param("username")
@@ -423,8 +554,12 @@ func (u *user) Update(ctx *gin.Context) {
 	// get the user from the database
 	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
@@ -434,8 +569,12 @@ func (u *user) Update(ctx *gin.Context) {
 	var userUpdate models.User
 	err = ctx.BindJSON(&userUpdate)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "BadRequest",
+				Code:    "BadRequest",
+				Message: "Invalid JSON body",
+			},
 		})
 		return
 	}
@@ -451,8 +590,12 @@ func (u *user) Update(ctx *gin.Context) {
 		return verifyKey, nil
 	})
 	if !token.Valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid token",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Unauthorized",
+				Code:    "Unauthorized",
+				Message: "Invalid token",
+			},
 		})
 		ctx.Abort()
 		return
@@ -460,8 +603,12 @@ func (u *user) Update(ctx *gin.Context) {
 
 	// check if username is same as the one in the token
 	if claims.Username != username {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid token",
+		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Unauthorized",
+				Code:    "Unauthorized",
+				Message: "permission denied",
+			},
 		})
 		ctx.Abort()
 		return
@@ -487,9 +634,12 @@ func (u *user) Update(ctx *gin.Context) {
 		// Validate Password
 		ok := utils.IsValidPassword(*user.Password)
 		if !ok {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error":   "bad request",
-				"message": "bad password",
+			ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+				Error: models.ServiceError{
+					Kind:    "BadRequest",
+					Code:    "BadRequest",
+					Message: "Invalid password",
+				},
 			})
 			ctx.Abort()
 			return
@@ -497,8 +647,12 @@ func (u *user) Update(ctx *gin.Context) {
 		// Hash the password before storing
 		*user.Password, err = utils.HashAndSalt(*userUpdate.Password)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Internal Server Error",
+			ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+				Error: models.ServiceError{
+					Kind:    "Internal",
+					Code:    "InternalServerError",
+					Message: err.Error(),
+				},
 			})
 			ctx.Abort()
 			return
@@ -510,23 +664,35 @@ func (u *user) Update(ctx *gin.Context) {
 	// Update the user
 	err = u.userRepo.UpdateUser(&user)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
 	}
 	user.Password = nil
 	user.Level = nil
-	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
-		"message": "User updated successfully",
-		// "token":   tokenString,
-		"user": user,
-	})
+	ctx.JSON(http.StatusOK, user)
 }
 
-// Delete deletes a user
+// Delete godoc
+// @Summary Delete user
+// @Description Delete a user
+// @ID delete-user
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param token header string true "Token"
+// @Param username path string true "Username"
+// @Param user body models.Credentials true "User"
+// @Success 200 {object} models.Message
+// @Failure 400 {object} models.ErrResponse
+// @Failure 500 {object} models.ErrResponse
+// @Router /api/v1/user/{username} [delete]
 func (u *user) Delete(ctx *gin.Context) {
 	// get the username param from context
 	username := ctx.Param("username")
@@ -572,8 +738,12 @@ func (u *user) Delete(ctx *gin.Context) {
 
 	user, err = u.userRepo.GetUserByUsername(claims.Username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
@@ -597,15 +767,19 @@ func (u *user) Delete(ctx *gin.Context) {
 
 	err = u.userRepo.DeleteUser(user.ID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal Server Error",
+		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			Error: models.ServiceError{
+				Kind:    "Internal",
+				Code:    "InternalServerError",
+				Message: err.Error(),
+			},
 		})
 		ctx.Abort()
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
-		"message": "User deleted successfully",
+	ctx.JSON(http.StatusOK, models.Message{
+		Code:    "Success",
+		Message: "User deleted successfully",
 	})
 }
 
