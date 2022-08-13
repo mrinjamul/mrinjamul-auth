@@ -22,6 +22,9 @@ func init() {
 
 	// public key
 	publicKeyPath := utils.GetEnv("PUBLIC_KEY")
+	if publicKeyPath == "" {
+		log.Println("PUBLIC_KEY is not set")
+	}
 	publicKey, err := utils.ReadSecretKey(publicKeyPath)
 	if err != nil {
 		log.Println(err)
