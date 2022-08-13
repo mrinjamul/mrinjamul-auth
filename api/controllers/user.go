@@ -80,17 +80,21 @@ type user struct {
 // @Produce  json
 // @Param user body models.User true "User"
 // @Success 200 {object} models.User
-// @Failure 400 {object} models.ErrResponse
-// @Failure 409 {object} models.ErrResponse
-// @Failure 500 {object} models.ErrResponse
+// @Failure 400 {object} models.Error
+// @Failure 409 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /api/v1/auth/signup [post]
 func (u *user) Register(ctx *gin.Context) {
 	var user models.User
 	// Get the JSON body and decode into user struct
 	err := ctx.BindJSON(&user)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "bad request",
+		ctx.JSON(http.StatusBadRequest, models.Error{
+			Error: models.ServiceError{
+				Kind:    "BadRequest",
+				Code:    "BadRequest",
+				Message: "Invalid JSON body",
+			},
 		})
 		ctx.Abort()
 		return
@@ -98,7 +102,7 @@ func (u *user) Register(ctx *gin.Context) {
 
 	// check if valid username
 	if !utils.IsValidUserName(*user.Username) {
-		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+		ctx.JSON(http.StatusBadRequest, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Invalid",
 				Code:    "InvalidRequestData",
@@ -119,7 +123,7 @@ func (u *user) Register(ctx *gin.Context) {
 	// Validate Password
 	ok := utils.IsValidPassword(*user.Password)
 	if !ok {
-		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+		ctx.JSON(http.StatusBadRequest, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Invalid",
 				Code:    "InvalidRequestData",
@@ -138,11 +142,11 @@ func (u *user) Register(ctx *gin.Context) {
 	// Hash the password before storing
 	*user.Password, err = utils.HashAndSalt(*user.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
-				Message: "Internal Server Error",
+				Message: err.Error(),
 			},
 		})
 		ctx.Abort()
@@ -152,7 +156,7 @@ func (u *user) Register(ctx *gin.Context) {
 	// Create the user
 	err = u.userRepo.CreateUser(&user)
 	if err != nil {
-		ctx.JSON(http.StatusConflict, models.ErrResponse{
+		ctx.JSON(http.StatusConflict, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Conflict",
 				Code:    "Conflict",
@@ -170,7 +174,7 @@ func (u *user) Register(ctx *gin.Context) {
 		user.Level = &accessLevel
 		err = u.userRepo.UpdateUser(&user)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			ctx.JSON(http.StatusInternalServerError, models.Error{
 				Error: models.ServiceError{
 					Kind:    "Internal",
 					Code:    "InternalServerError",
@@ -203,8 +207,9 @@ func (u *user) Register(ctx *gin.Context) {
 // @Produce  json
 // @Param user body models.Credentials true "User"
 // @Success 200 {object} models.Token
-// @Failure 400 {object} models.ErrResponse
-// @Failure 500 {object} models.ErrResponse
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /api/v1/auth/login [post]
 func (u *user) Login(ctx *gin.Context) {
 	var creds models.Credentials
@@ -212,7 +217,7 @@ func (u *user) Login(ctx *gin.Context) {
 	// Get the JSON body and decode into creds struct
 	err := ctx.BindJSON(&creds)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+		ctx.JSON(http.StatusBadRequest, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Invalid",
 				Code:    "InvalidRequestData",
@@ -222,7 +227,7 @@ func (u *user) Login(ctx *gin.Context) {
 		return
 	}
 	if (creds.Email == "" && creds.Username == "") || creds.Password == "" {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusBadRequest, models.Error{
 			Error: models.ServiceError{
 				Kind:    "BadRequest",
 				Code:    "BadRequest",
@@ -241,11 +246,12 @@ func (u *user) Login(ctx *gin.Context) {
 	if err != nil || user.ID == 0 {
 		user, err = u.userRepo.GetUserByEmail(creds.Email) // error
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			ctx.JSON(http.StatusBadRequest, models.Error{
 				Error: models.ServiceError{
-					Kind:    "Unauthorized",
-					Code:    "Unauthorized",
-					Message: "Invalid username or password",
+					Kind:    "BadRequest",
+					Code:    "BadRequest",
+					Param:   "username or email",
+					Message: "Invalid username or email",
 				},
 			})
 			ctx.Abort()
@@ -255,7 +261,7 @@ func (u *user) Login(ctx *gin.Context) {
 
 	// if user is deleted then return unauthorized
 	if user.DeletedAt.Valid {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusUnauthorized, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Unauthorized",
 				Code:    "Unauthorized",
@@ -269,7 +275,7 @@ func (u *user) Login(ctx *gin.Context) {
 	// Validate the password
 	valid := utils.VerifyHash(creds.Password, *user.Password)
 	if !valid {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusUnauthorized, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Unauthorized",
 				Code:    "Unauthorized",
@@ -301,7 +307,7 @@ func (u *user) Login(ctx *gin.Context) {
 	// Create the JWT string
 	tokenString, err := token.SignedString(signingKey)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
@@ -326,8 +332,9 @@ func (u *user) Login(ctx *gin.Context) {
 // @Produce  json
 // @Param token header string true "Token"
 // @Success 200 {object} models.Token
-// @Failure 400 {object} models.ErrResponse
-// @Failure 500 {object} models.ErrResponse
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /api/v1/auth/refresh [post]
 func (u *user) RefreshToken(ctx *gin.Context) {
 	// Get JWT token
@@ -335,7 +342,7 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 	if err != nil {
 		tkn, err := utils.ParseToken(ctx.Request.Header.Get("Authorization"))
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			ctx.JSON(http.StatusUnauthorized, models.Error{
 				Error: models.ServiceError{
 					Kind:    "Unauthorized",
 					Code:    "Unauthorized",
@@ -352,7 +359,7 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 		return verifyKey, nil
 	})
 	if !token.Valid {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusUnauthorized, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Unauthorized",
 				Code:    "Unauthorized",
@@ -364,7 +371,7 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 	}
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+			ctx.JSON(http.StatusUnauthorized, models.Error{
 				Error: models.ServiceError{
 					Kind:    "Unauthorized",
 					Code:    "Unauthorized",
@@ -375,7 +382,7 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 
 			return
 		}
-		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+		ctx.JSON(http.StatusBadRequest, models.Error{
 			Error: models.ServiceError{
 				Kind:    "BadRequest",
 				Code:    "BadToken",
@@ -387,7 +394,7 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 	}
 	// check if token is expired
 	if time.Now().Unix() > claims.ExpiresAt.Unix() {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusUnauthorized, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Unauthorized",
 				Code:    "Unauthorized",
@@ -417,7 +424,7 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 	// Create the JWT string
 	tokenString, err = token.SignedString(signingKey)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
@@ -442,8 +449,9 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 // @Param token header string true "Token"
 // @Param username path string true "Username"
 // @Success 200 {object} models.User
-// @Failure 400 {object} models.ErrResponse
-// @Failure 500 {object} models.ErrResponse
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /api/v1/user/{username} [get]
 func (u *user) View(ctx *gin.Context) {
 	// get the username param from context
@@ -451,7 +459,7 @@ func (u *user) View(ctx *gin.Context) {
 	// get the user from the database
 	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
@@ -476,7 +484,7 @@ func (u *user) View(ctx *gin.Context) {
 				return verifyKey, nil
 			})
 			if !token.Valid {
-				ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+				ctx.JSON(http.StatusUnauthorized, models.Error{
 					Error: models.ServiceError{
 						Kind:    "Unauthorized",
 						Code:    "Unauthorized",
@@ -488,7 +496,7 @@ func (u *user) View(ctx *gin.Context) {
 			}
 			user, err := u.userRepo.GetUserByUsername(claims.Username)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+				ctx.JSON(http.StatusInternalServerError, models.Error{
 					Error: models.ServiceError{
 						Kind:    "Internal",
 						Code:    "InternalServerError",
@@ -523,7 +531,7 @@ func (u *user) View(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, user)
 	} else {
 		// if user is not found, return error
-		ctx.JSON(http.StatusNotFound, models.ErrResponse{
+		ctx.JSON(http.StatusNotFound, models.Error{
 			Error: models.ServiceError{
 				Kind:    "NotFound",
 				Code:    "NotFound",
@@ -544,8 +552,9 @@ func (u *user) View(ctx *gin.Context) {
 // @Param username path string true "Username"
 // @Param user body models.User true "User"
 // @Success 200 {object} models.User
-// @Failure 400 {object} models.ErrResponse
-// @Failure 500 {object} models.ErrResponse
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /api/v1/user/{username} [put]
 func (u *user) Update(ctx *gin.Context) {
 	// get the username param from context
@@ -554,7 +563,7 @@ func (u *user) Update(ctx *gin.Context) {
 	// get the user from the database
 	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
@@ -569,7 +578,7 @@ func (u *user) Update(ctx *gin.Context) {
 	var userUpdate models.User
 	err = ctx.BindJSON(&userUpdate)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+		ctx.JSON(http.StatusBadRequest, models.Error{
 			Error: models.ServiceError{
 				Kind:    "BadRequest",
 				Code:    "BadRequest",
@@ -590,7 +599,7 @@ func (u *user) Update(ctx *gin.Context) {
 		return verifyKey, nil
 	})
 	if !token.Valid {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusUnauthorized, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Unauthorized",
 				Code:    "Unauthorized",
@@ -603,7 +612,7 @@ func (u *user) Update(ctx *gin.Context) {
 
 	// check if username is same as the one in the token
 	if claims.Username != username {
-		ctx.JSON(http.StatusUnauthorized, models.ErrResponse{
+		ctx.JSON(http.StatusUnauthorized, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Unauthorized",
 				Code:    "Unauthorized",
@@ -634,7 +643,7 @@ func (u *user) Update(ctx *gin.Context) {
 		// Validate Password
 		ok := utils.IsValidPassword(*user.Password)
 		if !ok {
-			ctx.JSON(http.StatusBadRequest, models.ErrResponse{
+			ctx.JSON(http.StatusBadRequest, models.Error{
 				Error: models.ServiceError{
 					Kind:    "BadRequest",
 					Code:    "BadRequest",
@@ -647,7 +656,7 @@ func (u *user) Update(ctx *gin.Context) {
 		// Hash the password before storing
 		*user.Password, err = utils.HashAndSalt(*userUpdate.Password)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+			ctx.JSON(http.StatusInternalServerError, models.Error{
 				Error: models.ServiceError{
 					Kind:    "Internal",
 					Code:    "InternalServerError",
@@ -664,7 +673,7 @@ func (u *user) Update(ctx *gin.Context) {
 	// Update the user
 	err = u.userRepo.UpdateUser(&user)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
@@ -690,8 +699,9 @@ func (u *user) Update(ctx *gin.Context) {
 // @Param username path string true "Username"
 // @Param user body models.Credentials true "User"
 // @Success 200 {object} models.Message
-// @Failure 400 {object} models.ErrResponse
-// @Failure 500 {object} models.ErrResponse
+// @Failure 400 {object} models.Error
+// @Failure 401 {object} models.Error
+// @Failure 500 {object} models.Error
 // @Router /api/v1/user/{username} [delete]
 func (u *user) Delete(ctx *gin.Context) {
 	// get the username param from context
@@ -738,7 +748,7 @@ func (u *user) Delete(ctx *gin.Context) {
 
 	user, err = u.userRepo.GetUserByUsername(claims.Username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",
@@ -767,7 +777,7 @@ func (u *user) Delete(ctx *gin.Context) {
 
 	err = u.userRepo.DeleteUser(user.ID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, models.ErrResponse{
+		ctx.JSON(http.StatusInternalServerError, models.Error{
 			Error: models.ServiceError{
 				Kind:    "Internal",
 				Code:    "InternalServerError",

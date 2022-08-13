@@ -10,7 +10,16 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "mrinjamul@gmail.com"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://github.com/mrinjamul/mrinjamul-auth/blob/main/LICENSE"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -23,19 +32,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "healthcheck"
+                    "health"
                 ],
                 "summary": "Show the status of the system.",
                 "operationId": "healthcheck",
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.Check"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/controllers.Check"
                         }
@@ -78,13 +81,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -123,13 +132,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -170,19 +185,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -228,13 +243,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -287,13 +308,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -346,13 +373,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -422,7 +455,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ErrResponse": {
+        "models.Error": {
             "type": "object",
             "properties": {
                 "error": {
@@ -527,12 +560,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	BasePath:         "/",
+	Schemes:          []string{"http", "https"},
+	Title:            "mrinjamul-auth API",
+	Description:      "This is a authentication server for user management.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

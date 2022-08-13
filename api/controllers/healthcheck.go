@@ -84,10 +84,9 @@ type healthCheck struct {
 // @Summary Show the status of the system.
 // @Description checks the health of the system.
 // @ID healthcheck
-// @Tags healthcheck
+// @Tags health
 // @Produce json
 // @Success 200 {object} controllers.Check
-// @Failure 500 {object} controllers.Check
 // @Router /api/health [get]
 func (m *healthCheck) HealthCheck(ctx *gin.Context, startTime time.Time, bootTime time.Duration) {
 	status := StatusUnavailable

@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   controllers.Check:
     properties:
@@ -43,7 +44,7 @@ definitions:
       username:
         type: string
     type: object
-  models.ErrResponse:
+  models.Error:
     properties:
       error:
         $ref: '#/definitions/models.ServiceError'
@@ -109,7 +110,17 @@ definitions:
         type: boolean
     type: object
 info:
-  contact: {}
+  contact:
+    email: mrinjamul@gmail.com
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a authentication server for user management.
+  license:
+    name: MIT License
+    url: https://github.com/mrinjamul/mrinjamul-auth/blob/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: mrinjamul-auth API
+  version: "1.0"
 paths:
   /api/health:
     get:
@@ -122,13 +133,9 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/controllers.Check'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.Check'
       summary: Show the status of the system.
       tags:
-      - healthcheck
+      - health
   /api/v1/auth/login:
     post:
       consumes:
@@ -152,11 +159,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
       summary: Login a user
       tags:
       - auth
@@ -182,11 +193,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
       summary: Refresh a token
       tags:
       - auth
@@ -213,15 +228,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
       summary: Register a new user
       tags:
       - auth
@@ -258,11 +273,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
       summary: Delete user
       tags:
       - user
@@ -292,11 +311,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
       summary: Get user details
       tags:
       - user
@@ -332,12 +355,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Error'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrResponse'
+            $ref: '#/definitions/models.Error'
       summary: Update user details
       tags:
       - user
+schemes:
+- http
+- https
 swagger: "2.0"

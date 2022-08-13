@@ -9,6 +9,21 @@ import (
 	"github.com/mrinjamul/mrinjamul-auth/api/routes"
 )
 
+// @title mrinjamul-auth API
+// @version 1.0
+// @description This is a authentication server for user management.
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email mrinjamul@gmail.com
+// @license.name MIT License
+// @license.url https://github.com/mrinjamul/mrinjamul-auth/blob/main/LICENSE
+// @BasePath /
+// @schemes http https
+// @securitydefinitions.apikey	APIKeyAuth
+// @in header
+// @name Authorization
+
 var (
 	startTime time.Time = time.Now()
 )

@@ -1,8 +1,25 @@
 {
+    "schemes": [
+        "http",
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a authentication server for user management.",
+        "title": "mrinjamul-auth API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "mrinjamul@gmail.com"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://github.com/mrinjamul/mrinjamul-auth/blob/main/LICENSE"
+        },
+        "version": "1.0"
     },
+    "basePath": "/",
     "paths": {
         "/api/health": {
             "get": {
@@ -11,19 +28,13 @@
                     "application/json"
                 ],
                 "tags": [
-                    "healthcheck"
+                    "health"
                 ],
                 "summary": "Show the status of the system.",
                 "operationId": "healthcheck",
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.Check"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/controllers.Check"
                         }
@@ -66,13 +77,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -111,13 +128,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -158,19 +181,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -216,13 +239,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -275,13 +304,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -334,13 +369,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrResponse"
+                            "$ref": "#/definitions/models.Error"
                         }
                     }
                 }
@@ -410,7 +451,7 @@
                 }
             }
         },
-        "models.ErrResponse": {
+        "models.Error": {
             "type": "object",
             "properties": {
                 "error": {

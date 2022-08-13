@@ -10,19 +10,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title mrinjamul-auth API
-// @version 2.0
-// @description This is a authentication server for user management.
-// @termsOfService http://swagger.io/terms/
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email mrinjamul@gmail.com
-// @license.name MIT License
-// @license.url https://github.com/mrinjamul/mrinjamul-auth/blob/main/LICENSE
-// @host localhost:8080
-// @BasePath /
-// @schemes http
-
 var (
 	// StartTime is the time when the server started
 	StartTime time.Time

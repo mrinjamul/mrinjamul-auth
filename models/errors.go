@@ -1,7 +1,7 @@
 package models
 
-// ErrResponse is used as the Response Body
-type ErrResponse struct {
+// Error is used as the Response Body
+type Error struct {
 	Error ServiceError `json:"error"`
 }
 
