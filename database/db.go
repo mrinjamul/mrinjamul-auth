@@ -7,12 +7,14 @@ import (
 
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var (
 	// IsConnected returns the connection status
 	IsConnected bool
+	IsSQLite    bool
 	DB          *gorm.DB
 )
 
@@ -56,6 +58,18 @@ func GetDB() *gorm.DB {
 		IsConnected = true
 	} else {
 		log.Println("failed to connect database")
+	}
+
+	// if unable to connect to database, create sqlite database
+	if !IsConnected {
+		// Create sqlite connection
+		DB, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+		if err == nil {
+			IsConnected = true
+			IsSQLite = true
+		} else {
+			log.Println("failed to connect database")
+		}
 	}
 
 	// Migrate the schema

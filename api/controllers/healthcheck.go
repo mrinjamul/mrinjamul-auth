@@ -87,16 +87,19 @@ func (m *healthCheck) HealthCheck(ctx *gin.Context, startTime time.Time, bootTim
 
 	if database.IsConnected {
 		status = StatusOK
+		if database.IsSQLite {
+			failures["postgres"] = "postgres is down using sqlite database"
+		}
 	} else {
 		status = StatusPartiallyAvailable
 		failures["postgres"] = "failed during postgresql health check"
 	}
-	if database.IsRedisConnected {
-		status = StatusOK
-	} else {
-		status = StatusPartiallyAvailable
-		failures["redis"] = "failed during redis health check"
-	}
+	// if database.IsRedisConnected {
+	// 	status = StatusOK
+	// } else {
+	// 	status = StatusPartiallyAvailable
+	// 	failures["redis"] = "failed during redis health check"
+	// }
 
 	ctx.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 	ctx.JSON(http.StatusOK, NewCheck(
