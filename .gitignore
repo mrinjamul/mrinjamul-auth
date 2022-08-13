@@ -10,8 +10,9 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-mrinjamul-api
+mrinjamul-auth
 *.log
+testdata
 
 # test db
 sqlite.db
@@ -20,5 +21,5 @@ sqlite.db
 # vendor/
 
 # secrets
-.env
-mrinjamul-auth
+*.env
+*.pem
