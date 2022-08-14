@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ template "head.html" . }}
+
+<body>
+    {{ template "nav.html" . }}
+    <!-- About section-->
+    <section class="pt-4 about" id="about">
+        <div class="container px-lg-5">
+            <div class="row gx-4 justify-content-center">
+                <div class="col-lg-8">
+                    <h2>About</h2>
+                    <p class="lead">
+                        Auth is a simple, powerful, and flexible authentication system developed in Go.
+                        It is designed to be easy to use and easy to configure.
+                        We are using it in our projects to provide authentication for our APIs.
+                        It developed by <a href="https://github.com/mrinjamul">
+                            <img src="https://avatars.githubusercontent.com/u/43756219?s=40&v=4" alt="mrinjamul"
+                                class="rounded-circle" width="40">
+                            <span class="ml-2">mrinjamul</span>
+                        </a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Services section-->
+    <section class="bg-light pt-4 about" id="services">
+        <div class="container px-lg-5">
+            <div class="row gx-4 justify-content-center">
+                <div class="col-lg-8">
+                    <h2>Services</h2>
+                    <p class="lead">
+                        Auth can be used for authentication for any kind of application.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Contact section-->
+    <section class="pt-4 about" id="contact">
+        <div class="container px-lg-5">
+            <div class="row gx-4 justify-content-center">
+                <div class="col-lg-8">
+                    <h2>Contact us</h2>
+                    <p class="lead">
+                        If you have any questions or suggestions, please feel free to contact us.
+                    <p>
+                        <span>Email: </span>
+                        <a href="mailto:mrinjamul@gmail.com">mrinjamul@gmail.com</a>
+                    </p>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Blank section -->
+
+    {{ template "footer.html" . }}
+    {{ template "commonjs.html" . }}
+</body>
+
+</html>

@@ -3,6 +3,7 @@ package routes
 import (
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/mrinjamul/mrinjamul-auth/api/services"
 	docs "github.com/mrinjamul/mrinjamul-auth/docs"
@@ -21,11 +22,34 @@ var (
 func InitRoutes(router *gin.Engine) {
 	// Initialize services
 	svc := services.NewServices()
+	// Add CORS middleware
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	router.Use(cors.New(config))
 
 	// Initialize the routes
 
-	// Backend API
+	// Home Page
+	router.GET("/", func(ctx *gin.Context) {
+		svc.View().Index(ctx)
+	})
 
+	// About Page
+	router.GET("/about", func(ctx *gin.Context) {
+		svc.View().About(ctx)
+	})
+
+	// Health Check
+	// router.GET("/stats", func(ctx *gin.Context) {
+	// 	svc.View().Stats(ctx)
+	// })
+
+	// 404 Page
+	router.NoRoute(func(ctx *gin.Context) {
+		svc.View().NotFound(ctx)
+	})
+
+	// Backend API
 	docs.SwaggerInfo.BasePath = "/"
 	// health check
 	router.GET("/api/health", func(ctx *gin.Context) {

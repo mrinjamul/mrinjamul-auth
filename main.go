@@ -1,7 +1,11 @@
 package main
 
 import (
+	"embed"
+	"html/template"
+	"io/fs"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -28,6 +32,9 @@ var (
 	startTime time.Time = time.Now()
 )
 
+//go:embed templates/*
+var webpages embed.FS
+
 func main() {
 	// Get port from env
 	port := ":3000"
@@ -38,6 +45,19 @@ func main() {
 	}
 	// Set the router as the default one shipped with Gin
 	server := gin.Default()
+	templ := template.Must(template.New("").ParseFS(webpages, "templates/layouts/*.html"))
+	server.SetHTMLTemplate(templ)
+	static, err := fs.Sub(webpages, "templates/static")
+	if err != nil {
+		panic(err)
+	}
+	// media, err := fs.Sub(webpages, "templates/media")
+	// if err != nil {
+	// 		panic(err)
+	// }
+	server.StaticFS("/static", http.FS(static))
+	// server.StaticFS("/media", http.FS(media))
+
 	// Initialize the routes
 	routes.StartTime = startTime
 	routes.InitRoutes(server)
