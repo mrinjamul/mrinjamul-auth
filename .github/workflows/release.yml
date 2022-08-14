@@ -35,6 +35,7 @@ jobs:
         run: |
           go version
           go build -o ./artifacts/auth-service-${GITHUB_REF##*/}-${{ matrix.suffix }} .
+          go build -o ./artifacts/keygen-${GITHUB_REF##*/}-${{ matrix.suffix }} ./examples/keygen/...
       - uses: actions/upload-artifact@v2
         name: Upload artifacts
         with:
