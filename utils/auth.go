@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -22,7 +21,7 @@ func ParseToken(authorization string) (string, error) {
 	if strings.HasPrefix(authorization, "Bearer ") {
 		return strings.TrimPrefix(authorization, "Bearer "), nil
 	}
-	return "", fmt.Errorf("invalid authorization header")
+	return "", errors.New("invalid authorization header")
 }
 
 // HashAndSalt generates a hashed password

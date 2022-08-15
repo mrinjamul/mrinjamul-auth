@@ -1,0 +1,12 @@
+server:
+  host: localhost
+  port: "8080"
+  private_key: ./config/private.pem
+  public_key: ./config/public.pem
+database:
+  type: postgres
+  host: localhost
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  name: "postgres"

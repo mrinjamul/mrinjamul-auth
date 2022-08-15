@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/mrinjamul/mrinjamul-auth/config"
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -19,45 +19,29 @@ var (
 )
 
 func GetDB() *gorm.DB {
-	// Get ENV variables
-	dbHost := os.Getenv("POSTGRES_HOST")
-	dbName := os.Getenv("POSTGRES_DB")
-	dbUser := os.Getenv("POSTGRES_USER")
-	dbPassword := os.Getenv("POSTGRES_PASSWORD")
-	dbPort := os.Getenv("POSTGRES_PORT")
-	if DB == nil {
-		if dbHost == "" {
-			fmt.Println("Environment variable DB_HOST is null.")
-			return nil
-		}
-		if dbName == "" {
-			fmt.Println("Environment variable DB_NAME is null.")
-			return nil
-		}
-		if dbUser == "" {
-			fmt.Println("Environment variable DB_USERNAME is null.")
-			return nil
-		}
-		if dbPassword == "" {
-			fmt.Println("Environment variable DB_PASSWORD is null.")
-			return nil
-		}
+	var err error
+	cfg := config.GetConfig()
+	switch cfg.Database.Type {
+	case "postgres":
+		// Connect to DB
+		dest := fmt.Sprintf(
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Kolkata",
+			cfg.Database.Host, cfg.Database.Username, cfg.Database.Password, cfg.Database.Name, cfg.Database.Port)
+		DB, err = gorm.Open(postgres.Open(dest), &gorm.Config{})
 
-		if dbPort == "" {
-			dbPort = "5432"
+		if err == nil {
+			IsConnected = true
+		} else {
+			log.Println("failed to connect database")
 		}
-	}
-
-	// Connect to DB
-	dest := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Kolkata",
-		dbHost, dbUser, dbPassword, dbName, dbPort)
-	DB, err := gorm.Open(postgres.Open(dest), &gorm.Config{})
-
-	if err == nil {
-		IsConnected = true
-	} else {
-		log.Println("failed to connect database")
+	case "sqlite":
+		// Connect to DB
+		DB, err = gorm.Open(sqlite.Open(cfg.Database.Name), &gorm.Config{})
+		if err == nil {
+			IsConnected = true
+		} else {
+			log.Println("failed to connect database")
+		}
 	}
 
 	// if unable to connect to database, create sqlite database

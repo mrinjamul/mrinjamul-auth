@@ -6,11 +6,11 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mrinjamul/mrinjamul-auth/api/routes"
+	"github.com/mrinjamul/mrinjamul-auth/config"
 )
 
 // @title mrinjamul-auth API
@@ -36,13 +36,9 @@ var (
 var webpages embed.FS
 
 func main() {
-	// Get port from env
-	port := ":3000"
-	_, present := os.LookupEnv("PORT")
-	if present {
-		port = ":" + os.Getenv("PORT")
-
-	}
+	// Get the configuration
+	cfg := config.GetConfig()
+	addr := cfg.Database.Host + ":" + cfg.Server.Port
 	// Set the router as the default one shipped with Gin
 	server := gin.Default()
 	templ := template.Must(template.New("").ParseFS(webpages, "templates/layouts/*.html"))
@@ -64,5 +60,5 @@ func main() {
 	routes.BootTime = time.Since(startTime)
 
 	// Start and run the server
-	log.Fatal(server.Run(port))
+	log.Fatal(server.Run(addr))
 }

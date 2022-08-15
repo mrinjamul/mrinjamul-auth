@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/mrinjamul/mrinjamul-auth/config"
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"github.com/mrinjamul/mrinjamul-auth/repository"
 	"github.com/mrinjamul/mrinjamul-auth/utils"
@@ -26,10 +27,9 @@ var (
 
 func init() {
 	// Load secret keys
-
+	cfg := config.GetConfig()
 	// private key
-	privateKeyPath := utils.GetEnv("PRIVATE_KEY")
-	privateKey, err := utils.ReadSecretKey(privateKeyPath)
+	privateKey, err := utils.ReadSecretKey(cfg.Server.PrivateKey)
 	if err != nil {
 		log.Println(err)
 	}
@@ -39,8 +39,7 @@ func init() {
 	}
 
 	// public key
-	publicKeyPath := utils.GetEnv("PUBLIC_KEY")
-	publicKey, err := utils.ReadSecretKey(publicKeyPath)
+	publicKey, err := utils.ReadSecretKey(cfg.Server.PublicKey)
 	if err != nil {
 		log.Println(err)
 	}
