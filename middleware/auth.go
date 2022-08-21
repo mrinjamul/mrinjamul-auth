@@ -21,14 +21,31 @@ func init() {
 	// Load secret keys
 
 	// public key
+	var publicKey []byte
+	var err error
 	publicKeyPath := utils.GetEnv("PUBLIC_KEY")
 	if publicKeyPath == "" {
 		log.Println("PUBLIC_KEY is not set")
+		key := utils.GetEnv("PUBLICKEY")
+		if key != "" {
+			// Decode base64
+			key, _ = utils.DecodeBase64(key)
+			if key != "" {
+				log.Println("failed to decode PUBLICKEY")
+				log.Println("PUBLICKEY should be base64 encoded")
+			}
+			publicKey = []byte(key)
+		} else {
+			log.Println("PUBLICKEY is not set")
+			log.Println("Please set either PUBLIC_KEY or PUBLICKEY")
+		}
+	} else {
+		publicKey, err = utils.ReadSecretKey(publicKeyPath)
+		if err != nil {
+			log.Println(err)
+		}
 	}
-	publicKey, err := utils.ReadSecretKey(publicKeyPath)
-	if err != nil {
-		log.Println(err)
-	}
+
 	verifyKey, err = jwt.ParseECPublicKeyFromPEM(publicKey)
 	if err != nil {
 		log.Println(err)

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/base64"
 	"errors"
 	"os"
 	"strings"
@@ -128,4 +129,13 @@ func ValidateUser(u *models.User) error {
 		return errors.New("password should contain at least seven characters, one number and one special character")
 	}
 	return nil
+}
+
+// DecodeBase64 decodes the base64 string
+func DecodeBase64(s string) (string, error) {
+	decoded, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+	return string(decoded), nil
 }
