@@ -243,9 +243,9 @@ func GetConfig() *Config {
 	if present {
 		config.Database.Username = os.Getenv("DB_USER")
 	}
-	_, present = os.LookupEnv("DB_PASSWORD")
+	_, present = os.LookupEnv("DB_PASS")
 	if present {
-		config.Database.Password = os.Getenv("DB_PASSWORD")
+		config.Database.Password = os.Getenv("DB_PASS")
 	}
 	_, present = os.LookupEnv("DB_NAME")
 	if present {

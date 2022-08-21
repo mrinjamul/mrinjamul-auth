@@ -25,7 +25,7 @@ func GetDB() *gorm.DB {
 	case "postgres":
 		// Connect to DB
 		dest := fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Kolkata",
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Kolkata",
 			cfg.Database.Host, cfg.Database.Username, cfg.Database.Password, cfg.Database.Name, cfg.Database.Port)
 		DB, err = gorm.Open(postgres.Open(dest), &gorm.Config{})
 
