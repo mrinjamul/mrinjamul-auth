@@ -33,6 +33,21 @@ func init() {
 	if err != nil {
 		log.Println(err)
 	}
+	if privateKey == nil {
+		key := utils.GetEnv("PRIVATEKEY")
+		if key != "" {
+			// Decode base64
+			key, _ = utils.DecodeBase64(key)
+			if key == "" {
+				log.Println("failed to decode PRIVATEKEY")
+				log.Println("PRIVATEKEY should be base64 encoded")
+			}
+			privateKey = []byte(key)
+		} else {
+			log.Println("PRIVATEKEY is not set")
+			log.Println("Please provide private key via any option")
+		}
+	}
 	signingKey, err = jwt.ParseECPrivateKeyFromPEM(privateKey)
 	if err != nil {
 		log.Println(err)
@@ -42,6 +57,21 @@ func init() {
 	publicKey, err := utils.ReadSecretKey(cfg.Server.PublicKey)
 	if err != nil {
 		log.Println(err)
+	}
+	if publicKey == nil {
+		key := utils.GetEnv("PUBLICKEY")
+		if key != "" {
+			// Decode base64
+			key, _ = utils.DecodeBase64(key)
+			if key == "" {
+				log.Println("failed to decode PUBLICKEY")
+				log.Println("PUBLICKEY should be base64 encoded")
+			}
+			publicKey = []byte(key)
+		} else {
+			log.Println("PUBLICKEY is not set")
+			log.Println("Please provide public key via any option")
+		}
 	}
 	verifyKey, err = jwt.ParseECPublicKeyFromPEM(publicKey)
 	if err != nil {

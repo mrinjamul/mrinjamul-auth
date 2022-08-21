@@ -1,8 +1,8 @@
 server:
   host: localhost
   port: "8080"
-  private_key: ./config/private.pem
-  public_key: ./config/public.pem
+  private_key: ""
+  public_key: ""
 database:
   type: postgres
   host: localhost

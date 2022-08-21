@@ -30,7 +30,7 @@ func init() {
 		if key != "" {
 			// Decode base64
 			key, _ = utils.DecodeBase64(key)
-			if key != "" {
+			if key == "" {
 				log.Println("failed to decode PUBLICKEY")
 				log.Println("PUBLICKEY should be base64 encoded")
 			}

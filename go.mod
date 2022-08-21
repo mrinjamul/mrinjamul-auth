@@ -1,5 +1,6 @@
 module github.com/mrinjamul/mrinjamul-auth
 
+// +heroku goVersion go1.18
 go 1.18
 
 require (
@@ -11,6 +12,7 @@ require (
 	github.com/swaggo/gin-swagger v1.5.2
 	github.com/swaggo/swag v1.8.4
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.3.8
 	gorm.io/driver/sqlite v1.3.6
 	gorm.io/gorm v1.23.8
@@ -56,5 +58,4 @@ require (
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
