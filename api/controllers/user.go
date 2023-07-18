@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mrinjamul/mrinjamul-auth/config"
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"github.com/mrinjamul/mrinjamul-auth/repository"
@@ -34,19 +34,7 @@ func init() {
 		log.Println(err)
 	}
 	if privateKey == nil {
-		key := utils.GetEnv("PRIVATEKEY")
-		if key != "" {
-			// Decode base64
-			key, _ = utils.DecodeBase64(key)
-			if key == "" {
-				log.Println("failed to decode PRIVATEKEY")
-				log.Println("PRIVATEKEY should be base64 encoded")
-			}
-			privateKey = []byte(key)
-		} else {
-			log.Println("PRIVATEKEY is not set")
-			log.Println("Please provide private key via any option")
-		}
+		panic("PRIVATE_KEY is not set")
 	}
 	signingKey, err = jwt.ParseECPrivateKeyFromPEM(privateKey)
 	if err != nil {
@@ -59,19 +47,7 @@ func init() {
 		log.Println(err)
 	}
 	if publicKey == nil {
-		key := utils.GetEnv("PUBLICKEY")
-		if key != "" {
-			// Decode base64
-			key, _ = utils.DecodeBase64(key)
-			if key == "" {
-				log.Println("failed to decode PUBLICKEY")
-				log.Println("PUBLICKEY should be base64 encoded")
-			}
-			publicKey = []byte(key)
-		} else {
-			log.Println("PUBLICKEY is not set")
-			log.Println("Please provide public key via any option")
-		}
+		panic("PUBLIC_KEY is not set")
 	}
 	verifyKey, err = jwt.ParseECPublicKeyFromPEM(publicKey)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"github.com/mrinjamul/mrinjamul-auth/utils"
 )
@@ -26,19 +26,6 @@ func init() {
 	publicKeyPath := utils.GetEnv("PUBLIC_KEY")
 	if publicKeyPath == "" {
 		log.Println("PUBLIC_KEY is not set")
-		key := utils.GetEnv("PUBLICKEY")
-		if key != "" {
-			// Decode base64
-			key, _ = utils.DecodeBase64(key)
-			if key == "" {
-				log.Println("failed to decode PUBLICKEY")
-				log.Println("PUBLICKEY should be base64 encoded")
-			}
-			publicKey = []byte(key)
-		} else {
-			log.Println("PUBLICKEY is not set")
-			log.Println("Please set either PUBLIC_KEY or PUBLICKEY")
-		}
 	} else {
 		publicKey, err = utils.ReadSecretKey(publicKeyPath)
 		if err != nil {

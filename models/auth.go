@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Create a struct that models the structure of a user in the request body

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mrinjamul/mrinjamul-auth/middleware"
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"github.com/mrinjamul/mrinjamul-auth/utils"
