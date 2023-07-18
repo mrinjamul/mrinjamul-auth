@@ -171,6 +171,24 @@ paths:
       summary: Login a user
       tags:
       - auth
+  /api/v1/auth/logout:
+    get:
+      description: Logout a user
+      operationId: logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Logout a user
+      tags:
+      - auth
   /api/v1/auth/refresh:
     post:
       consumes:
@@ -370,4 +388,9 @@ paths:
 schemes:
 - http
 - https
+securityDefinitions:
+  APIKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

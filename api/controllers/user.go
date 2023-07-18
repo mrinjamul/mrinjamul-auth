@@ -79,18 +79,18 @@ type user struct {
 }
 
 // Register godoc
-// @Summary Register a new user
+// @Summary     Register a new user
 // @Description Register a new user
-// @ID register
-// @Tags auth
-// @Accept  json
-// @Produce  json
-// @Param user body models.User true "User"
-// @Success 200 {object} models.User
-// @Failure 400 {object} models.Error
-// @Failure 409 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Router /api/v1/auth/signup [post]
+// @ID          register
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       user body     models.User true "User"
+// @Success     200  {object} models.User
+// @Failure     400  {object} models.Error
+// @Failure     409  {object} models.Error
+// @Failure     500  {object} models.Error
+// @Router      /api/v1/auth/signup [post]
 func (u *user) Register(ctx *gin.Context) {
 	var user models.User
 	// Get the JSON body and decode into user struct
@@ -206,18 +206,18 @@ func (u *user) Register(ctx *gin.Context) {
 }
 
 // Login godoc
-// @Summary Login a user
+// @Summary     Login a user
 // @Description Login a user
-// @ID login
-// @Tags auth
-// @Accept  json
-// @Produce  json
-// @Param user body models.Credentials true "User"
-// @Success 200 {object} models.Token
-// @Failure 400 {object} models.Error
-// @Failure 401 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Router /api/v1/auth/login [post]
+// @ID          login
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       user body     models.Credentials true "User"
+// @Success     200  {object} models.Token
+// @Failure     400  {object} models.Error
+// @Failure     401  {object} models.Error
+// @Failure     500  {object} models.Error
+// @Router      /api/v1/auth/login [post]
 func (u *user) Login(ctx *gin.Context) {
 	var creds models.Credentials
 	var user models.User
@@ -333,18 +333,18 @@ func (u *user) Login(ctx *gin.Context) {
 }
 
 // RefreshToken godoc
-// @Summary Refresh a token
+// @Summary     Refresh a token
 // @Description Refresh a token
-// @ID refresh-token
-// @Tags auth
-// @Accept  json
-// @Produce  json
-// @Param token header string true "Token"
-// @Success 200 {object} models.Token
-// @Failure 400 {object} models.Error
-// @Failure 401 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Router /api/v1/auth/refresh [post]
+// @ID          refresh-token
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       token header   string true "Token"
+// @Success     200   {object} models.Token
+// @Failure     400   {object} models.Error
+// @Failure     401   {object} models.Error
+// @Failure     500   {object} models.Error
+// @Router      /api/v1/auth/refresh [post]
 func (u *user) RefreshToken(ctx *gin.Context) {
 	// Get JWT token
 	tokenString, err := ctx.Cookie("token")
@@ -452,14 +452,14 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 }
 
 // Logout godoc
-// @Summary Logout a user
+// @Summary     Logout a user
 // @Description Logout a user
-// @ID logout
-// @Tags auth
-// @Produce  json
-// @Success 200 {object} string
-// @Failure 500 {object} string
-// @Router /api/v1/auth/logout [get]
+// @ID          logout
+// @Tags        auth
+// @Produce     json
+// @Success     200 {object} string
+// @Failure     500 {object} string
+// @Router      /api/v1/auth/logout [get]
 func (u *user) Logout(ctx *gin.Context) {
 	// check if cookie is present
 	_, err := ctx.Cookie("token")
@@ -480,19 +480,19 @@ func (u *user) Logout(ctx *gin.Context) {
 }
 
 // View godoc
-// @Summary Get user details
+// @Summary     Get user details
 // @Description Get user details
-// @ID get-user
-// @Tags user
-// @Accept  json
-// @Produce  json
-// @Param token header string true "Token"
-// @Param username path string true "Username"
-// @Success 200 {object} models.User
-// @Failure 400 {object} models.Error
-// @Failure 401 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Router /api/v1/user/{username} [get]
+// @ID          get-user
+// @Tags        user
+// @Accept      json
+// @Produce     json
+// @Param       token    header   string true "Token"
+// @Param       username path     string true "Username"
+// @Success     200      {object} models.User
+// @Failure     400      {object} models.Error
+// @Failure     401      {object} models.Error
+// @Failure     500      {object} models.Error
+// @Router      /api/v1/user/{username} [get]
 func (u *user) View(ctx *gin.Context) {
 	// get the username param from context
 	username := ctx.Param("username")
@@ -582,20 +582,20 @@ func (u *user) View(ctx *gin.Context) {
 }
 
 // Update godoc
-// @Summary Update user details
+// @Summary     Update user details
 // @Description Update user details
-// @ID update-user
-// @Tags user
-// @Accept  json
-// @Produce  json
-// @Param token header string true "Token"
-// @Param username path string true "Username"
-// @Param user body models.User true "User"
-// @Success 200 {object} models.User
-// @Failure 400 {object} models.Error
-// @Failure 401 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Router /api/v1/user/{username} [put]
+// @ID          update-user
+// @Tags        user
+// @Accept      json
+// @Produce     json
+// @Param       token    header   string      true "Token"
+// @Param       username path     string      true "Username"
+// @Param       user     body     models.User true "User"
+// @Success     200      {object} models.User
+// @Failure     400      {object} models.Error
+// @Failure     401      {object} models.Error
+// @Failure     500      {object} models.Error
+// @Router      /api/v1/user/{username} [put]
 func (u *user) Update(ctx *gin.Context) {
 	// get the username param from context
 	username := ctx.Param("username")
@@ -729,20 +729,20 @@ func (u *user) Update(ctx *gin.Context) {
 }
 
 // Delete godoc
-// @Summary Delete user
+// @Summary     Delete user
 // @Description Delete a user
-// @ID delete-user
-// @Tags user
-// @Accept  json
-// @Produce  json
-// @Param token header string true "Token"
-// @Param username path string true "Username"
-// @Param user body models.Credentials true "User"
-// @Success 200 {object} models.Message
-// @Failure 400 {object} models.Error
-// @Failure 401 {object} models.Error
-// @Failure 500 {object} models.Error
-// @Router /api/v1/user/{username} [delete]
+// @ID          delete-user
+// @Tags        user
+// @Accept      json
+// @Produce     json
+// @Param       token    header   string             true "Token"
+// @Param       username path     string             true "Username"
+// @Param       user     body     models.Credentials true "User"
+// @Success     200      {object} models.Message
+// @Failure     400      {object} models.Error
+// @Failure     401      {object} models.Error
+// @Failure     500      {object} models.Error
+// @Router      /api/v1/user/{username} [delete]
 func (u *user) Delete(ctx *gin.Context) {
 	// get the username param from context
 	username := ctx.Param("username")

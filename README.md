@@ -37,6 +37,7 @@ Generate OpenAPI spec:
 
 ```bash
 swag init --parseDependency --parseInternal
+# swag init --parseDependency  --parseInternal -g main.go
 ```
 
 To run the application, run the following commands:

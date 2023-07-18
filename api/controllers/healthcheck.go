@@ -81,13 +81,13 @@ type healthCheck struct {
 }
 
 // HealthCheck godoc
-// @Summary Show the status of the system.
+// @Summary     Show the status of the system.
 // @Description checks the health of the system.
-// @ID healthcheck
-// @Tags health
-// @Produce json
-// @Success 200 {object} controllers.Check
-// @Router /api/health [get]
+// @ID          healthcheck
+// @Tags        health
+// @Produce     json
+// @Success     200 {object} controllers.Check
+// @Router      /api/health [get]
 func (m *healthCheck) HealthCheck(ctx *gin.Context, startTime time.Time, bootTime time.Duration) {
 	status := StatusUnavailable
 	failures := make(map[string]string)
