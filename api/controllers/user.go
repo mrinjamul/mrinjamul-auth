@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/mrinjamul/mrinjamul-auth/config"
 	"github.com/mrinjamul/mrinjamul-auth/models"
 	"github.com/mrinjamul/mrinjamul-auth/repository"
@@ -145,6 +146,9 @@ func (u *user) Register(ctx *gin.Context) {
 	user.Role = &role
 	accessLevel := 1
 	user.Level = &accessLevel
+
+	// Generate unique ID (UID)
+	user.UID = uuid.New().String()
 
 	// Hash the password before storing
 	*user.Password, err = utils.HashAndSalt(*user.Password)
@@ -549,6 +553,7 @@ func (u *user) View(ctx *gin.Context) {
 
 			user = models.User{
 				ID:         user.ID,
+				UID:        user.UID,
 				Username:   user.Username,
 				Email:      user.Email,
 				FirstName:  user.FirstName,

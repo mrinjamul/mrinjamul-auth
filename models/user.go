@@ -8,6 +8,7 @@ import (
 // User is a user of the application
 type User struct {
 	ID         uint         `json:"id,omitempty" gorm:"primary_key,autoIncrement,not null"`
+	UID        string       `json:"uid,omitempty" gorm:"unique,not null"`
 	FirstName  *string      `json:"first_name,omitempty" gorm:"not null"`
 	MiddleName *string      `json:"middle_name,omitempty"`
 	LastName   *string      `json:"last_name,omitempty" gorm:"not null"`

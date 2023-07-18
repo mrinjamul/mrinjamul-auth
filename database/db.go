@@ -24,9 +24,14 @@ func GetDB() *gorm.DB {
 	switch cfg.Database.Type {
 	case "postgres":
 		// Connect to DB
+		sslMode := "require"
+		if cfg.Database.Host == "localhost" {
+			sslMode = "disable"
+		}
 		dest := fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Kolkata",
-			cfg.Database.Host, cfg.Database.Username, cfg.Database.Password, cfg.Database.Name, cfg.Database.Port)
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Kolkata",
+			cfg.Database.Host, cfg.Database.Username, cfg.Database.Password, cfg.Database.Name,
+			cfg.Database.Port, sslMode)
 		DB, err = gorm.Open(postgres.Open(dest), &gorm.Config{})
 
 		if err == nil {
