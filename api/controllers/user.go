@@ -63,6 +63,8 @@ type User interface {
 	Login(ctx *gin.Context)
 	// RefreshToken refreshes the token
 	RefreshToken(ctx *gin.Context)
+	// Logout logs out a user
+	Logout(ctx *gin.Context)
 	// View returns the public or private user details
 	View(ctx *gin.Context)
 	// Update updates the user details
@@ -321,6 +323,8 @@ func (u *user) Login(ctx *gin.Context) {
 		})
 		return
 	}
+	// SET COOKIE
+	ctx.SetCookie("token", tokenString, 3600, "/", "", false, true)
 
 	ctx.JSON(http.StatusOK, models.Token{
 		Token: tokenString,
@@ -439,9 +443,40 @@ func (u *user) RefreshToken(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+	// SET COOKIE
+	ctx.SetCookie("token", tokenString, 3600, "/", "", false, true)
+
 	ctx.JSON(http.StatusOK, models.Token{
 		Token: tokenString,
 	})
+}
+
+// Logout godoc
+// @Summary Logout a user
+// @Description Logout a user
+// @ID logout
+// @Tags auth
+// @Produce  json
+// @Success 200 {object} string
+// @Failure 500 {object} string
+// @Router /api/v1/auth/logout [get]
+func (u *user) Logout(ctx *gin.Context) {
+	// check if cookie is present
+	_, err := ctx.Cookie("token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Not logged in",
+		})
+		ctx.Abort()
+		return
+	}
+	// SET COOKIE
+	ctx.SetCookie("token", "", -1, "/", "", false, true)
+	ctx.JSON(http.StatusOK,
+		gin.H{
+			"message": "Logged out successfully",
+		},
+	)
 }
 
 // View godoc

@@ -70,6 +70,9 @@ func InitRoutes(router *gin.Engine) {
 			auth.POST("/refresh", func(ctx *gin.Context) {
 				svc.AuthService().RefreshToken(ctx)
 			})
+			auth.GET("/logout", func(ctx *gin.Context) {
+				svc.AuthService().Logout(ctx)
+			})
 		}
 
 		// user is for user endpoint
